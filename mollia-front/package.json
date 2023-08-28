@@ -1,0 +1,24 @@
+{
+  "name": "mollia-front",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "font-awesome": "^4.7.0",
+    "highlight": "^0.2.4",
+    "highlight.js": "^11.8.0",
+    "marked": "^7.0.3",
+    "normalize.css": "^8.0.1",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "vite": "^4.4.5"
+  }
+}
