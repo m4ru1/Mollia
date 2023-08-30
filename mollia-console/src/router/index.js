@@ -12,19 +12,19 @@ const router = new createRouter({
                     component: () => import('../views/notfound/NotFound.vue'),
                     children: [
                         {
-                            path: '/create',
+                            path: 'create',
                             component: () => import('../views/article/ArticleEditor.vue')
                         },
                         {
-                            path: '/:id',
+                            path: ':id',
                             component: () => import('../views/article/ArticleEditor.vue')
                         },
                         {
-                            path: '/list',
+                            path: 'list',
                             component: () => import('../views/article/ArticleCategory.vue')
                         },
                         {
-                            path: '/category',
+                            path: 'category',
                             component: () => import('../views/article/ArticleCategory.vue')
                         }
                     ]
@@ -34,15 +34,15 @@ const router = new createRouter({
                     component: () => import('../views/notfound/NotFound.vue'),
                     children: [
                         {
-                            path: '/theme',
+                            path: 'theme',
                             component: () => import('../views/option/ThemeOption.vue'),
                         },
                         {
-                            path: '/profile',
+                            path: 'profile',
                             component: () => import('../views/option/ProfileOption.vue'),
                         },
                         {
-                            path: '/about',
+                            path: 'about',
                             component: () => import('../views/option/AboutOption.vue'),
                         },
                     ]
@@ -52,11 +52,11 @@ const router = new createRouter({
                     component: () => import('../views/notfound/NotFound.vue'),
                     children: [
                         {
-                            path: '/image',
+                            path: 'image',
                             component: () => import('../views/storage/ImageStorage.vue'),
                         },
                         {
-                            path: '/attach',
+                            path: 'attach',
                             component: () => import('../views/storage/AttachStorage.vue')
                         }
                     ]
