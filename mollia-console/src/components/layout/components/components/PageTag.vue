@@ -63,14 +63,14 @@ function handleClose(){
     --pagetag-bg-color: white;
 
     /* ***** */
-    min-width: 84px;
+    min-width: 120px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 0px 5px;
+    padding: 0px 0px;
     margin: 0 0 0 15px;
     background-color: var(--pagetag-bg-color);
     font-size: 14px;
@@ -81,7 +81,7 @@ function handleClose(){
     }
     .close-btn{
         margin-top: 2px;
-        margin-left: 10px;
+        margin-right: 5px;
         transition: all .5s ease-in-out;
         .close-icon{
             height: 16px;
