@@ -16,7 +16,7 @@ import PageTag from './components/PageTag.vue';
 let pageStore = usePageStore();
 
 onMounted(() => {
-    addEventListener('scroll', (window, event) => {
+    addEventListener('wheel', (event) => {
         let dock = document.querySelector('.page-dock .dock-content');
         if (dock){
             dock.setAttribute('translateX', '5px');

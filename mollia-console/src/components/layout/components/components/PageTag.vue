@@ -36,21 +36,19 @@ function handleClose(){
     // 仅当剩余打开标签页数量大于1时生效
     if(pageStore.pages.length > 1){
         // 标签页关闭
-        let selectedPage;
         let pageIndex = pageStore.pages.findIndex((item) => pageStore.pageName(item) === props.pageName);
         if (pageIndex != -1){
             let pageObject = pageStore.pages[pageIndex];
             if (pageObject.curr){ // 若被删除页面为当前被选中页面，则应选择已打开页面中的一项作为下一个被选中页面
                 if (pageIndex === (pageStore.pages.length - 1)){
-                    selectedPage = pageStore.pages[pageIndex - 1];
+                    pageStore.pages[pageIndex - 1].curr = true;
                 }else if (pageIndex === 0){
-                    selectedPage = pageStore.pages[1];
+                    pageStore.pages[1].curr = true;
                 }else{
-                    selectedPage = pageStore.pages[pageIndex + 1];
+                    pageStore.pages[pageIndex + 1].curr = true;
                 }
             }
             pageStore.pages.splice(pageIndex, 1);
-            selectedPage.curr = true;
         }
         // 拓展：文章缓存数据丢弃
         // TODO: 
