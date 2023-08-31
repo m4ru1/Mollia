@@ -3,11 +3,11 @@
         <el-menu
             default-active="1"
             class="nav-content"
-            :collapse="isCollapse"
+            :collapse="themeStore.isCollapse"
             popper-effect="dark"
         >
             <div class="nav-header"> 
-                <span v-if="!isCollapse"> Mollia </span>
+                <span v-if="!themeStore.isCollapse"> Mollia </span>
                 <span v-else> Mo </span>
             </div>
             <el-menu-item index="1" @click="handleClick">
@@ -72,13 +72,16 @@
 
 <script setup>
 import { ref } from 'vue';
+import { usePageStore } from '../../stores/PageStore';
+import { useThemeStore } from '../../stores/ThemeStore';
 import { useRouter } from 'vue-router';
 import { House, Document, Edit, PriceTag, Menu,
          Files, PictureFilled, Management, Operation,
          Avatar, Sunrise, Notification} 
          from '@element-plus/icons-vue';
 
-let isCollapse = ref(false);
+let themeStore = useThemeStore();
+let pageStore = usePageStore();
 
 const router = useRouter();
 const routeMap = {
@@ -94,19 +97,39 @@ const routeMap = {
 }
 
 function handleClick(elMenuItem){
+
+    // 1. 获取路由路径
     let routePath = routeMap[elMenuItem.index];
+    // 2. 路由变更
     if(routePath){
         router.push(routePath);
-    } 
+    }
+    // 3. page-store内容更新
+    // 检查pages数组是否存在选中页面，如果存在则将其标记为当前页面.
+    // 若不存在，则将其添加到pages中，再重复上一步骤.
+    pageStore.currPage.curr = false;
+
+    let selectedPage = pageStore.pages.find((item) => item.path === routePath);
+    if (selectedPage){
+        selectedPage.curr = true;
+    }else{
+        pageStore.pages.push({
+            path: routePath,
+            curr: true
+        });
+    }
 }
 </script>
 
 <style>
 
 .nav-board{
+    /* min-width: 250px; */
+    transition: all .2s ease-in-out;
     --el-menu-bg-color: #333;
     --el-menu-text-color: white;
     --el-menu-hover-bg-color: rgba(16, 185, 129, .4);
+    --el-transition-duration: .18s;
     user-select: none;
     .nav-header{
         padding: 30px 0px;

@@ -17,11 +17,15 @@ import AppHeader from '../src/components/layout/AppHeader.vue';
 
 <style scoped>
 .app{
+  /* */
+  --theme-primary-color: #10b981;
+
   /* --nav-width: calc(var(--el-menu-base-level-padding) + var(--el-menu-level-padding) + var(--el-menu-icon-width)); */
   position: absolute;
   display: flex;
   flex-direction: row;
   width: 100vw;
+  overflow: hidden;
   .app-nav{
     width: 250px;
     height: 100%;
