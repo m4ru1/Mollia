@@ -15,6 +15,8 @@ const props = defineProps({
     pageName: String,
 })
 
+const emit = defineEmits(['tagClose']);
+
 let router = useRouter();
 let pageStore = usePageStore();
 
@@ -50,6 +52,9 @@ function handleClose(){
             }
             pageStore.pages.splice(pageIndex, 1);
         }
+        // 触发TagClose事件
+        emit("tagClose");
+        
         // 拓展：文章缓存数据丢弃
         // TODO: 
     }
