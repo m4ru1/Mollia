@@ -16,7 +16,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { usePageStore } from '../../../stores/PageStore';
 import {
     Expand, Fold
@@ -41,7 +40,7 @@ function handleExpand(){
     flex-direction: row;
     .collapse-btn{
         font-size: 21px; 
-        padding: 2px 10px 2px 10px;
+        margin: 2px 10px 2px 10px;
         cursor: pointer;
         transition: .5s all ease-in;
     }
