@@ -110,6 +110,7 @@ onMounted(() => {
                     translateX.value += y;
                     dockContent.style.translate = `${translateX.value}px 0px`;
                     if(translateX.value > 0){
+                        cancleTimer(); 
                         startTimer();   // 超过左侧标定点，倒计时结束后进行归位，该计时效果可以被覆盖
                     }
                 }
