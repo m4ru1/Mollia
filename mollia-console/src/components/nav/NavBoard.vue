@@ -2,19 +2,17 @@
     <div class="nav-board">
         <el-menu
             default-active="1"
-            class="nav-content"
+            :class='{"nav-content": true, "nav-content-expand": !isCollapse}'
             :collapse="themeStore.isCollapse"
             popper-effect="dark"
         >
             <div class="nav-header"> 
-                <span v-if="!themeStore.isCollapse"> Mollia </span>
+                <span v-if="!themeStore.isCollapse" class="nav-header-span--expand"> Mollia </span>
                 <span v-else> Mo </span>
             </div>
             <el-menu-item index="1" @click="handleClick">
-                <template #title>
-                    <el-icon><House /></el-icon>
-                    <span> 仪表盘 </span>
-                </template>
+                <el-icon><House /></el-icon>
+                <span> 仪表盘 </span>
             </el-menu-item>
             <el-sub-menu index="2" :show-timeout="100" :hide-timeout="10">
                 <template #title>
@@ -124,8 +122,6 @@ function handleClick(elMenuItem){
 <style>
 
 .nav-board{
-    /* min-width: 250px; */
-    transition: all .2s ease-in-out;
     --el-menu-bg-color: #333;
     --el-menu-text-color: white;
     --el-menu-hover-bg-color: rgba(16, 185, 129, .4);
@@ -146,6 +142,9 @@ function handleClick(elMenuItem){
     .nav-content{
         height: 100vh;
         border-right: 0px;
+    }
+    .nav-header-span--expand{
+        padding: 0 50px;
     }
 }
 </style>

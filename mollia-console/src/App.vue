@@ -20,14 +20,12 @@ import AppHeader from '../src/components/layout/AppHeader.vue';
   /* */
   --theme-primary-color: #10b981;
 
-  /* --nav-width: calc(var(--el-menu-base-level-padding) + var(--el-menu-level-padding) + var(--el-menu-icon-width)); */
   position: absolute;
   display: flex;
   flex-direction: row;
   width: 100vw;
   overflow: hidden;
   .app-nav{
-    width: 250px;
     height: 100%;
   }
   .app-content{
@@ -35,7 +33,7 @@ import AppHeader from '../src/components/layout/AppHeader.vue';
     display: flex;
     flex-direction: column;
     .header{
-      background-color: antiquewhite;
+      background-color: #444;
       width: 100%;
       height: 100px;
     }
