@@ -74,7 +74,6 @@ onMounted(() => {
             if(event.deltaY < 0){
                 // 计算标定点
                 maxOffset = Math.abs((app.clientWidth - nav.clientWidth) - dock.clientWidth) + 50;
-                console.log(translateX.value, maxOffset);
                 let distance = event.deltaY * 0.3;
                 var y;
                 if(translateX.value > 0){
