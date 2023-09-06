@@ -19,11 +19,12 @@ import PageFooter from './PageFooter.vue';
 
 <style scoped>
 .page-content{
+    flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: auto;
     position: relative;
     padding: 15px;
+    overflow: auto;
     .page-title{
         color: var(--theme-pagetitle-text-color);
         padding: 0 15px 0 15px;

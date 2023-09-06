@@ -23,7 +23,6 @@ import PageDock from './components/PageDock.vue';
     user-select: none;
     .high-row, .low-row{
         flex: 1;
-        flex-grow: 1;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -31,6 +30,7 @@ import PageDock from './components/PageDock.vue';
     .high-row{
         .navigation{
             flex-grow: 1;
+            padding: 10px 0;
         }
     }
     .low-row{
