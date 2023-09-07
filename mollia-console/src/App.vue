@@ -5,10 +5,10 @@
     </div>
     <div class="app-content">
       <AppHeader class="page-header"></AppHeader>
-      <router-view class="page-content" v-slot="{ Component }">
-        <transition name="fade">
-          <component :is="Component"></component>
-        </transition>
+      <router-view v-slot="{ Component }" class="page-content">
+          <transition name="fade" mode="out-in">
+              <component :is="Component" />
+          </transition>
       </router-view>
     </div>
 </div>
@@ -52,7 +52,18 @@ import AppHeader from '../src/components/layout/AppHeader.vue';
     }
     .page-content{
       flex-grow: 1;
+      height: 100%;
     }
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

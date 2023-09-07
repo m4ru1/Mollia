@@ -31,12 +31,27 @@ import PageFooter from './PageFooter.vue';
         user-select: none;
     }
     .page-view{
+        display: flex;
+        flex-direction: column;
         flex: 1;
         border-radius: 15px;
         background-color: var(--theme-pageview-bg-color);
     }
     .page-footer{
         padding-top: 10px;
+    }
+    &::-webkit-scrollbar{ /*滚动条宽度*/
+        width: 4px;
+        height: 1px;
+    }
+
+    &::-webkit-scrollbar-track{ /*滚动条轨道*/
+        background-color: #1b1b1b;
+    }
+
+    &::-webkit-scrollbar-thumb{ /*滚动条滑块*/
+        background-color: #10b981;
+        border-radius: 90px;
     }
 }
 </style>
