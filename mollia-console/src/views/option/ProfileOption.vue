@@ -140,6 +140,7 @@ function saveHandle(index){  // 保存配置
 .profile-option{
     display: flex;
     background-color: var(--theme-pagecontent-bg-color);
+    user-select: none;
     .switch-bar{
         padding: 15px;
     }
