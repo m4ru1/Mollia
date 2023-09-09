@@ -153,6 +153,8 @@ for( let i = 0; i < 50; i++){
         }
         .article-table{
             margin: 15px 15px;
+            max-width: 90vw;
+            min-width: 1000px;
         }
         .pagination-box{
             display: flex;

@@ -167,6 +167,8 @@ for (let i = 0; i < 100; i++){
     }
     .category-table{
         padding: 0px 15px 30px 15px;
+        max-width: 90vw;
+        min-width: 1000px;
     }
     .pagination-box{
         display: flex;
