@@ -17,9 +17,7 @@
 
 <script setup>
 import { usePageStore } from '../../../stores/PageStore';
-import {
-    Expand, Fold
-} from '@element-plus/icons-vue';
+import { Expand, Fold, ArrowRight } from '@element-plus/icons-vue';
 import { useThemeStore } from '../../../stores/ThemeStore';
 
 let themeStore = useThemeStore();

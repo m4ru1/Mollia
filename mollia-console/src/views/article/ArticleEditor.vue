@@ -172,8 +172,6 @@ function beforeAvatarUpload(){ // 上传文章封面图准备逻辑
 function handleAvatarSuccess(){ // 上传文章封面图成功逻辑
 
 }
-
-
 </script>
 
 <style scoped>
@@ -242,7 +240,7 @@ function handleAvatarSuccess(){ // 上传文章封面图成功逻辑
                     text-align: center;
                 }
             }
-            .op-btn{
+            .op-btn-board{
                 display: flex;
                 justify-content: end;
                 align-items: end;

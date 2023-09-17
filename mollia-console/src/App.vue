@@ -18,9 +18,6 @@
 import NavBoard from '../src/components/nav/NavBoard.vue';
 import AppHeader from '../src/components/layout/AppHeader.vue';
 
-// 禁用全局鼠标滚动事件监听 TODO:
-
-
 </script>
 
 <style scoped>
@@ -32,12 +29,11 @@ import AppHeader from '../src/components/layout/AppHeader.vue';
     --theme-pagetitle-text-color: #333;
     --theme-pageview-bg-color: white;
 
-    overflow: auto;
+    overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: row;
     width: 100vw;
-    /* overflow: hidden; */
     .app-nav{
         height: 100%;
     }

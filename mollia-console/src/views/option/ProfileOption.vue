@@ -6,7 +6,7 @@
         </template>
         <template #page-view>
             <div class="switch-bar">
-                <el-menu mode="horizontal" :ellipsis="false" @select="switchHandle">
+                <el-menu mode="horizontal" :ellipsis="false" @select="switchHandle" default-active="1">
                     <el-menu-item index="1">基本设置</el-menu-item>
                     <el-menu-item index="2">文章设置</el-menu-item>
                     <el-menu-item index="3">个人设置</el-menu-item>
@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Plus } from '@element-plus/icons-vue'
 import PageContent from '../../components/layout/PageContent.vue';
 
@@ -134,6 +134,7 @@ function initHandle(){  // 表单恢复默认值（即重新拉取并填充当�
 function saveHandle(index){  // 保存配置
 
 }
+
 </script>
 
 <style scoped>

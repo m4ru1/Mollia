@@ -73,7 +73,7 @@ onMounted(() => {
 
 
 </script>
-<style>
+<style scoped>
 
 .specific-article-page{
     display: flex;

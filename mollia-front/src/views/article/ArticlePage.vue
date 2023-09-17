@@ -17,7 +17,7 @@ import ProfileBoard from '../../components/profile/ProfileBoard.vue';
 
 </script>
 
-<style>
+<style scoped>
 .article-page{
     display: flex;
     justify-content: center;
@@ -93,6 +93,4 @@ import ProfileBoard from '../../components/profile/ProfileBoard.vue';
         }
     }
 }
-
-
 </style>

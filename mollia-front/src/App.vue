@@ -8,7 +8,11 @@ import AppFooter from "./components/layout/AppFooter.vue";
         <AppHeader class="app-header"></AppHeader>
         <div class="background-img"></div>
         <div class="main">
-            <router-view></router-view>
+            <router-view v-slot="{ Component }">
+                <transition name="fade" mode="out-in">
+                    <component :is="Component" />
+                </transition>
+            </router-view>
         </div>
         <AppFooter class="app-footer"></AppFooter>
     </div>
@@ -49,5 +53,15 @@ body::-webkit-scrollbar-track{ /*滚动条轨道*/
 body::-webkit-scrollbar-thumb{ /*滚动条滑块*/
     background-color: #10b981;
     border-radius: 90px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

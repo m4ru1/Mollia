@@ -2,7 +2,7 @@
     <div class="nav-board">
         <el-menu
             default-active="1"
-            :class='{"nav-content": true, "nav-content-expand": !isCollapse}'
+            :class='{"nav-content": true, "nav-content-expand": !themeStore.isCollapse}'
             :collapse="themeStore.isCollapse"
             popper-effect="dark"
         >
