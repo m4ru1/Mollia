@@ -42,6 +42,11 @@ ps:
 	@echo "Service status:"
 	docker-compose -f $(COMPOSE_FILE) ps
 
+# 运行所有单元测试
+test:
+	@echo "Running all unit tests..."
+	@cd mollia-server && go test ./... -v
+
 # 清理环境
 clean: down
 	@echo "Cleaning up dangling images..."

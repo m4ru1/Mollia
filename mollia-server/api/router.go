@@ -7,27 +7,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterRoutes 注册所有 API 路由
-func RegisterRoutes(r *gin.Engine, articleHandler *handler.ArticleHandler) {
-	// 创建 v1 路由组
+func RegisterRoutes(r *gin.Engine,
+	userHandler *handler.UserHandler,
+	articleHandler *handler.ArticleHandler,
+	categoryHandler *handler.CategoryHandler,
+	tagHandler *handler.TagHandler,
+	storageHandler *handler.StorageHandler,
+	jwtSecret string,
+) {
 	v1 := r.Group("/api/v1")
 	{
-		// 认证路由
 		auth := v1.Group("/auth")
 		{
-			auth.POST("/login", handler.Login)
+			auth.POST("/login", userHandler.Login)
 		}
 
-		// 文章路由（公共）
 		publicArticles := v1.Group("/articles")
 		{
 			publicArticles.GET("", articleHandler.GetArticles)
 			publicArticles.GET("/:id", articleHandler.GetArticleByID)
 		}
 
-		// 管理员路由（需要认证）
 		admin := v1.Group("/admin")
-		admin.Use(middleware.AuthMiddleware())
+		admin.Use(middleware.AuthMiddleware(jwtSecret))
 		{
 			adminArticles := admin.Group("/articles")
 			{
@@ -37,26 +39,23 @@ func RegisterRoutes(r *gin.Engine, articleHandler *handler.ArticleHandler) {
 				adminArticles.PUT("/:id", articleHandler.UpdateArticle)
 				adminArticles.DELETE("/:id", articleHandler.DeleteArticle)
 			}
-
 			adminCategories := admin.Group("/categories")
 			{
-				adminCategories.POST("", handler.CreateCategory)
-				adminCategories.GET("", handler.GetCategories)
-				adminCategories.PUT("/:id", handler.UpdateCategory)
-				adminCategories.DELETE("/:id", handler.DeleteCategory)
+				adminCategories.POST("", categoryHandler.CreateCategory)
+				adminCategories.GET("", categoryHandler.GetCategories)
+				adminCategories.PUT("/:id", categoryHandler.UpdateCategory)
+				adminCategories.DELETE("/:id", categoryHandler.DeleteCategory)
 			}
-
 			adminTags := admin.Group("/tags")
 			{
-				adminTags.POST("", handler.CreateTag)
-				adminTags.GET("", handler.GetTags)
-				adminTags.PUT("/:id", handler.UpdateTag)
-				adminTags.DELETE("/:id", handler.DeleteTag)
+				adminTags.POST("", tagHandler.CreateTag)
+				adminTags.GET("", tagHandler.GetTags)
+				adminTags.PUT("/:id", tagHandler.UpdateTag)
+				adminTags.DELETE("/:id", tagHandler.DeleteTag)
 			}
-
 			adminStorage := admin.Group("/storage")
 			{
-				adminStorage.POST("/upload", handler.UploadFile)
+				adminStorage.POST("/upload", storageHandler.UploadFile)
 			}
 		}
 	}
