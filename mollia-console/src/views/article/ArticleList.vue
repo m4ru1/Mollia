@@ -2,9 +2,13 @@
     <div class="article-list">
         <PageContent class="page-content">
             <template #page-title>
-                <h2>文章列表</h2>
+                <div class="page-title-container">
+                    <h2>文章列表</h2>
+                    <el-button type="primary" @click="createHandle">新建文章</el-button>
+                </div>
             </template>
             <template #page-view>
+                <!-- filter-bar and search-bar are kept for future implementation -->
                 <div class="filter-bar">
                     <el-menu mode="horizontal" :ellipsis="false">
                         <span style="margin: auto 0;">文章状态：</span>
@@ -37,27 +41,43 @@
                     </el-button>
                 </div>
                 <div class="article-table">
-                    <el-table v-if="articleData.length" :data="articleData" border style="width: 100;">
+                    <el-table v-loading="loading" :data="articles" border style="width: 100%;">
                         <el-table-column prop="title" label="标题"></el-table-column>
-                        <el-table-column prop="category" label="分类"></el-table-column>
-                        <el-table-column prop="viewNumber" label="浏览量"></el-table-column>
-                        <el-table-column prop="createDate" label="创建日期"></el-table-column>
-                        <el-table-column label="置顶">
-                            <template v-slot="{ row }">
-                                <el-switch v-model="row.isTop" @change="topHandle(row)" :loading="row.topLoading"/>
+                        <el-table-column prop="status" label="状态">
+                             <template v-slot="{ row }">
+                                <el-tag :type="row.status === 'published' ? 'success' : 'info'">
+                                    {{ row.status === 'published' ? '已发布' : '草稿' }}
+                                </el-tag>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="" label="操作">
+                        <el-table-column prop="createdAt" label="创建日期">
                             <template v-slot="{ row }">
-                                <el-button @click="editHandle(row)" type="primary"> 编辑 </el-button>
-                                <el-button @click="deleteHandle(row)" type="danger"> 删除 </el-button>
+                                {{ new Date(row.createdAt).toLocaleString() }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="updatedAt" label="更新日期">
+                            <template v-slot="{ row }">
+                                {{ new Date(row.updatedAt).toLocaleString() }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="200">
+                            <template v-slot="{ row }">
+                                <el-button @click="editHandle(row)" type="primary" size="small"> 编辑 </el-button>
+                                <el-button @click="deleteHandle(row)" type="danger" size="small"> 删除 </el-button>
                             </template>
                         </el-table-column>
                     </el-table>
-                    <el-empty v-else description="这里空空如也"></el-empty>
+                    <el-empty v-if="!loading && !articles.length" description="这里空空如也"></el-empty>
                 </div>
                 <div class="pagination-box">
-                    <el-pagination background layout="prev, pager, next" :total="articleData.length"></el-pagination>
+                    <el-pagination 
+                        background 
+                        layout="prev, pager, next, total" 
+                        :total="total"
+                        v-model:current-page="currentPage"
+                        :page-size="pageSize"
+                        @current-change="fetchArticles"
+                    />
                 </div>
             </template>
         </PageContent>
@@ -65,18 +85,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessageBox, ElMessage } from 'element-plus';
 import PageContent from '../../components/layout/PageContent.vue';
+import { getAdminArticles, deleteArticle } from '../../api';
 
-// 文章状态筛选
-let perPage = ref(7);  // 文章数据列表
-let articleData = ref([]);  // 文章数据列表
-let activeArticleType = ref('all'); // 当前展示文章类型 【全部，公开，私密，草稿箱，回收站】
-let activeArticleData = computed(()=>{ // 当前展示文章列表
-    return articleData.value.filter((item) => item.type === activeArticleType.value || activeArticleType.value === 'all');
-});
+const router = useRouter();
 
-// 文章检索
+const articles = ref([]);
+const total = ref(0);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const loading = ref(false);
+
+// TODO: The following refs are for future filter implementation
 let articleKeyWord = ref('');          // 待检索文章关键字
 let articleCategory = ref('');         // 待检索文章类别
 let articleCategoryChoices = ref([]);  // 现有文章类别
@@ -85,45 +108,63 @@ function searchHandle(){ // 检索逻辑
 
 }
 
+// 获取文章列表
+const fetchArticles = async () => {
+    loading.value = true;
+    try {
+        const response = await getAdminArticles({ page: currentPage.value, size: pageSize.value });
+        articles.value = response.list;
+        total.value = response.total;
+    } catch (error) {
+        ElMessage.error('获取文章列表失败: ' + error.message);
+    } finally {
+        loading.value = false;
+    }
+};
+
+// 在组件挂载时获取数据
+onMounted(fetchArticles);
+
 // 文章操作
 function topHandle(row){ // 置顶逻辑
     console.log(row);
 }
 
-function editHandle(row){  // 打开编辑页面逻辑
-    console.log(row);
-}
+// 操作处理
+const createHandle = () => {
+    router.push('/article/create');
+};
 
-function deleteHandle(row){  // 删除页面逻辑
-    console.log(row);
-}
+const editHandle = (row) => {
+    router.push(`/article/${row.id}`);
+};
 
-// 测试数据加载
-for( let i = 0; i < 50; i++){
-    articleData.value.push({
-        title: 'Python异步编程入门', 
-        category: 'Python', 
-        viewNumber: `32${i}`,
-        createDate: `2022-08-${i}`, 
-        isTop: false,
-        topLoading: false
+const deleteHandle = (row) => {
+    ElMessageBox.confirm(`确定要删除文章《${row.title}》吗？`, '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+    }).then(async () => {
+        try {
+            await deleteArticle(row.id);
+            ElMessage.success('删除成功');
+            fetchArticles(); // 刷新列表
+        } catch (error) {
+            ElMessage.error('删除失败: ' + error.message);
+        }
+    }).catch(() => {
+        // 用户取消操作
     });
-}
-// articleData.value.push({});
-// articleData.value.push({});
-// articleData.value.push({});
-// articleData.value.push({});
-// articleData.value.push({});
-// articleData.value.push({});
-// articleData.value.push({});
-// articleCategoryChoices.value.push();
-// articleCategoryChoices.value.push();
-// articleCategoryChoices.value.push();
-// articleCategoryChoices.value.push();
-// articleCategoryChoices.value.push();
+};
 </script>
 
 <style scoped>
+.page-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
 .article-list{
     display: flex;
     overflow: hidden;

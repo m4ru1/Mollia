@@ -1,13 +1,13 @@
 <template>
-    <div class="specific-article-page">
+    <div class="specific-article-page" v-if="article">
         <div class="left-area">
             <ArticleReader
-                :article-title="articleTitle"
-                :date="date"
-                :tag="tag"
-                :word-count="wordCount"
-                :read-time="readTime"
-                :article-data="testData"
+                :article-title="article.title"
+                :date="article.createdAt"
+                :tag="article.tags.join(', ')" 
+                :word-count="article.content.length" 
+                :read-time="Math.max(1, Math.floor(article.content.length / 150))"
+                :article-data="article.content"
             >
             </ArticleReader>
         </div>
@@ -24,21 +24,27 @@
 import ArticleReader from '../../components/article/ArticleReader.vue'
 import CatalogueBoard from '../../components/catalogue/CatalogueBoard.vue';
 import ProfileBoard from '../../components/profile/ProfileBoard.vue';
-
-import { testData } from './testData';
+import { useRoute } from 'vue-router';
+import { getArticleById } from '../../api';
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 
-let articleTitle = ref("记录：改了网安国密库的一个小Bug并提交PR");
-let date = ref("2023/08/15");
-let tag = ref("开源项目");
-let wordCount = ref(125);
-const readTime = Math.max(1, Math.floor(wordCount.value / 150));
+const route = useRoute();
+const article = ref(null); // 用于存储文章数据
+
 let isCatalogueDone = ref(false);
 
 // 文章数据渲染
 let catalogueData = reactive([]);     // 结构化目录数据
 let flatCatalogueData = reactive([]); // 扁平化目录数据 [√]
-onMounted(() => {
+onMounted(async () => {
+    try {
+        const articleId = route.params.id; // 从路由获取文章ID
+        article.value = await getArticleById(articleId);
+    } catch (error) {
+        console.error("获取文章失败:", error);
+        // 这里可以添加错误处理逻辑，例如跳转到404页面
+    }
+
     /* 目录数据生成, 以及目录定位标签插入 */
     let titleCollection = document.querySelectorAll('.article-reader .article-area .article-data h1,h2,h3');
     let currH1Pointer, currH2Pointer = null;

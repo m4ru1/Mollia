@@ -10,8 +10,9 @@
 </template>
 
 <script setup>
-import Navigation from './components/Navigation.vue';
-import PageDock from './components/PageDock.vue';
+import { ref } from 'vue';
+import Navigation from './Navigation.vue';
+import PageDock from './PageDock.vue';
 </script>
 
 <style>

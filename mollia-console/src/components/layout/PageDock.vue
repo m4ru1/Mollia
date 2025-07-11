@@ -14,7 +14,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { usePageStore } from '../../../stores/PageStore';
-import PageTag from './components/PageTag.vue';
+import PageTag from './PageTag.vue';
 
 let pageStore = usePageStore();
 let translateX = ref(0);

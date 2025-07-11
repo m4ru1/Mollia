@@ -3,255 +3,182 @@
         <PageContent class="page-content">
             <template #page-view>
                 <div class="editor-header">
-                    <el-input class="editor-title-input" v-model="articleTitle" placeholder="请输入文章标题"></el-input>
-                    <el-button type="primary" class="editor-btn" @click="postHandle">
-                        发布文章
-                    </el-button>
-                    <el-button type="success" class="editor-btn" @click="draftHandle">
-                        保存草稿
-                    </el-button>
+                    <el-input class="editor-title-input" v-model="articleForm.title" placeholder="请输入文章标题"></el-input>
+                    <div class="header-actions">
+                        <el-button type="primary" @click="saveArticle('published')" :loading="loading">发布文章</el-button>
+                        <el-button type="success" @click="saveArticle('draft')" :loading="loading">保存草稿</el-button>
+                    </div>
+                </div>
+                <div class="meta-form">
+                     <el-form :model="articleForm" label-width="80px" inline>
+                        <el-form-item label="分类">
+                            <el-select v-model.number="articleForm.categoryId" placeholder="请选择分类" filterable>
+                                <el-option v-for="category in categories" :key="category.id" :label="category.name" :value="category.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                         <el-form-item label="标签">
+                            <el-select v-model="articleForm.tags" multiple filterable allow-create default-first-option placeholder="请输入或创建标签">
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
                 </div>
                 <div id="editor"></div>
             </template>
         </PageContent>
-        <div :class="{'post-board':true, 'post-board-active': isPostBoardActive}">
-            <el-form class="post-form" label-width="100px">
-                <h2 class="post-form-title">文章发布</h2>
-                <el-form-item label="文章标签">
-                    <el-tag v-for="(item, index) in articleTags"
-                        :key="index"
-                        class="articleTag"
-                        closable
-                        @close="tagCloseHandle">
-                        {{ item.name }}
-                    </el-tag>
-                    <el-autocomplete v-if="isTagEditing" 
-                        placeholder="请输入标签名称"
-                        v-model="currEditTag"
-                        :fetch-suggestions="tagAutoFetch"
-                        @keydown="tagAddHandle"
-                        @blur="tagLoseFocus"
-                        autofocus> 
-
-                    </el-autocomplete>
-                    <el-button v-else :icon="Plus" @click="tagEditHandle"></el-button>
-                </el-form-item>
-                <el-form-item label="文章分类">
-                    <el-select class="input" placeholder="请选择文章类别" v-model="articleCategory">
-                        <el-option 
-                            v-for="(item, index) in articleCategoryChoices"
-                            :key="index"
-                            :label="item.label"
-                            :value="item.value"
-                        />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="文章缩略图">
-                    <el-upload
-                        class="avatar-uploader"
-                        action="javascript(0);"
-                        :show-file-list="false"
-                        :on-success="handleAvatarSuccess"
-                        :before-upload="beforeAvatarUpload">
-                        <img v-if="imgUrl" :src="imgUrl" class="avatar"/>
-                        <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-                    </el-upload>
-                </el-form-item>
-                <el-form-item label="置顶">
-                    <el-radio-group v-model="isArticleTop" class="input">
-                        <el-radio :label="true">打开</el-radio>
-                        <el-radio :label="false">关闭</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="发布形式">
-                    <el-radio-group v-model="isArticlePublic" class="input">
-                        <el-radio :label="true">公开</el-radio>
-                        <el-radio :label="false">私密</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="发布日期">
-                    <el-date-picker 
-                        v-model="articlePublishDate"
-                    />
-                </el-form-item>
-                <el-form-item>
-                    <div class="op-btn-board">
-                        <el-button type="primary">发布</el-button>
-                        <el-button @click="cancelHandle">取消</el-button>
-                    </div>
-                </el-form-item>
-            </el-form>
-        </div>        
     </div>
 </template>
 
 <script setup>
-import { Plus } from '@element-plus/icons-vue';
-import { onMounted, computed, ref, shallowRef, onUnmounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import PageContent from '../../components/layout/PageContent.vue';
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
+import { getAdminArticleById, createArticle, updateArticle, getCategories, uploadFile } from '../../api';
 
-// 创建编辑器实例
-const config = {
-    id: 'editor',
-    value: '',
-    callback: {
-        afterchange: function(md, html){
-            console.log('change');
-        }
-    }
-};
+const route = useRoute();
+const router = useRouter();
 
+const articleId = ref(route.params.id || null);
+const isEditMode = computed(() => !!articleId.value);
+const loading = ref(false);
 let cherry;
 
-onMounted(() => {
-    cherry = new Cherry(config);
+// 文章表单数据
+const articleForm = reactive({
+    title: '',
+    content: '',
+    categoryId: null,
+    tags: [],
+    status: 'draft',
 });
 
-// 文章数据存储
-let articleTitle = ref(''); // 文章标题
-let articleData = ()=>{     // 文章内容
-    return cherry.getMarkdown();
-};
-let articleTags = ref([]);  // 文章标签
-let articleTagChoices = ref([]);  // 文章现有标签
-let currEditTag = ref('');  // 当前编辑标签
-let isTagEditing = ref(false); // 当前是否正在编辑标签
-let articleCategoryChoices = ref([]); // 文章现有类别
-let articleCategory = ref('');  // 文章类别
-let isArticleTop = ref(false);  // 文章是否置顶
-let articlePublishDate = ref('');  // 文章发布日期
-let isArticlePublic = ref(true);  // 是否公开
+const categories = ref([]); // 存储分类列表
 
-let isPostBoardActive = ref(false);
+// 初始化编辑器
+onMounted(() => {
+    fetchCategories(); // 获取分类列表
+    cherry = new Cherry({
+        id: 'editor',
+        value: articleForm.content,
+        callback: {
+            afterChange: (md) => {
+                articleForm.content = md;
+            }
+        },
+        fileUpload: async (file, callback) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const res = await uploadFile(formData);
+                // 调用回调函数，第一个参数是URL，第二个参数是文件名（可选）
+                callback(res.url, file.name);
+            } catch (error) {
+                ElMessage.error('图片上传失败: ' + error.message);
+            }
+        },
+    });
 
-// 文章发布逻辑
-function postHandle(){ // 发布逻辑
-    isPostBoardActive.value = true;
-}
-
-function draftHandle(){ // 草稿逻辑
-
-}
-
-function cancelHandle(){ // PostBoard取消逻辑
-    isPostBoardActive.value = false;
-}
-
-// 表单操作逻辑
-function tagCloseHandle(args){  // 删除Tag
-    console.log(articleData());
-}
-
-function tagEditHandle(){  // 编辑Tag
-    isTagEditing.value = true;
-}
-
-function tagLoseFocus(){  // 标签编辑框失去焦点
-    currEditTag.value = '';
-    isTagEditing.value = false;
-}
-
-function tagAddHandle(event){ // 添加Tag
-    if(event.key === 'Enter'){
-
-    }else if(event.key === 'Escape'){
-        tagLoseFocus();
+    if (isEditMode.value) {
+        loadArticleData();
     }
-}
+});
 
-function tagAutoFetch(queryString){  // 自动搜索匹配现存Tag
+// 加载文章数据（编辑模式）
+const loadArticleData = async () => {
+    loading.value = true;
+    try {
+        const data = await getAdminArticleById(articleId.value);
+        articleForm.title = data.title;
+        articleForm.content = data.content;
+        articleForm.categoryId = data.category; // This is a name, need to find ID
+        articleForm.tags = data.tags;
+        cherry.setValue(data.content);
 
-}
+        // Find category ID from name
+        const category = categories.value.find(cat => cat.name === data.category);
+        if (category) {
+            articleForm.categoryId = category.id;
+        } else {
+            ElMessage.warning('文章原分类未找到');
+        }
 
-function beforeAvatarUpload(){ // 上传文章封面图准备逻辑
+    } catch (error) {
+        ElMessage.error('加载文章失败: ' + error.message);
+    } finally {
+        loading.value = false;
+    }
+};
 
-}
+// 获取分类列表
+const fetchCategories = async () => {
+    try {
+        categories.value = await getCategories();
+        // 如果是编辑模式，且文章数据已加载，确保分类ID是有效的
+        if (isEditMode.value && articleForm.categoryId) {
+            const found = categories.value.some(cat => cat.id === articleForm.categoryId);
+            if (!found) {
+                ElMessage.warning('文章原分类不存在，请重新选择');
+                articleForm.categoryId = null;
+            }
+        }
+    } catch (error) {
+        ElMessage.error('获取分类列表失败: ' + error.message);
+    }
+};
 
-function handleAvatarSuccess(){ // 上传文章封面图成功逻辑
+// 保存文章（发布或存为草稿）
+const saveArticle = async (status) => {
+    loading.value = true;
+    articleForm.status = status;
 
-}
-
+    try {
+        if (isEditMode.value) {
+            // 更新文章
+            await updateArticle(articleId.value, articleForm);
+            ElMessage.success('文章更新成功');
+        } else {
+            // 创建新文章
+            const response = await createArticle(articleForm);
+            ElMessage.success('文章创建成功');
+            router.push(`/article/${response.id}`); // 创建成功后跳转到编辑页
+        }
+    } catch (error) {
+        ElMessage.error('保存失败: ' + error.message);
+    } finally {
+        loading.value = false;
+    }
+};
 
 </script>
 
 <style scoped>
-.article-editor{
+.article-editor {
     display: flex;
     overflow: hidden;
     position: relative;
     background-color: var(--theme-pagecontent-bg-color);
-    .page-content{
-        display: flex;
-        flex-direction: column;
-        border-radius: 20px;
-        .editor-header{
-            display: flex;
-            padding:20px 15px 15px 15px;
-            .editor-title-input{
-                margin-right: 100px;
-            }
-        }
-        #editor{
-            max-width: 2600px;
-            max-height: 70vh;
-            padding: 5px 15px 10px 15px;
-        }
-    }
-    .post-board{
-        display: none;
-        position: absolute;
-        height: 100%;
-        width: 100%;
-        background-color: rgb(60, 60, 60, .7);
-        user-select: none;
-        .post-form{
-            margin: 5vh auto;
-            background-color: white;
-            padding: 100px 40px;
-            width: 600px;
-            border-radius: 20px;
-            .post-form-title{
-                padding-bottom: 30px;
-            }
-            .form-item{
-                .input{
-                    display: inline;
-                    width: 300px;
-                }
-            }
-            .avatar-uploader{
-                width: 178px;
-                height: 178px;
-                display: block;
-                border: 1px dashed black;
-                border-radius: 6px;
-                cursor: pointer;
-                transition: all .3s ease-out;
-                overflow: hidden;
-                position: relative;
-                &:hover{
-                    border-color: var(--theme-primary-color);
-                }
-                .avatar-uploader-icon{
-                    font-size: 28px;
-                    color: #8c939d;
-                    width: 178px;
-                    height: 178px;
-                    text-align: center;
-                }
-            }
-            .op-btn{
-                display: flex;
-                justify-content: end;
-                align-items: end;
-            }
-        }
-        z-index: 20;
-    }
-    .post-board-active{
-        display: block;
-    }
+}
+.page-content {
+    display: flex;
+    flex-direction: column;
+}
+.editor-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 15px 15px 15px;
+}
+.editor-title-input {
+    flex-grow: 1;
+    margin-right: 20px;
+}
+.meta-form {
+    padding: 0 15px 15px 15px;
+}
+#editor {
+    flex-grow: 1;
+    height: calc(100vh - 250px); /* Adjust height as needed */
+    padding: 0 15px 10px 15px;
 }
 </style>

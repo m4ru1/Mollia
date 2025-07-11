@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库服务
+  db:
+    image: mysql:8.0
+    container_name: mollia_db
+    restart: unless-stopped
+    environment:
+      # !! 警告: 请在生产环境中使用 .env 文件或 secrets 管理 !!
+      MYSQL_ROOT_PASSWORD: your_strong_password
+      MYSQL_DATABASE: mollia
+    ports:
+      - "3306:3306" # 将主机的3306端口映射到容器，方便本地调试
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/db/init:/docker-entrypoint-initdb.d # 挂载初始化脚本
+
+  # 后端 Go 服务
+  server:
+    build:
+      context: ./mollia-server
+    container_name: mollia_server
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      # !! 警告: 请在生产环境中使用 .env 文件或 secrets 管理 !!
+      DB_DSN: "root:your_strong_password@tcp(db:3306)/mollia?charset=utf8mb4&parseTime=True&loc=Local"
+      JWT_SECRET: "a_very_secret_key_that_is_long_enough"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./mollia-server/uploads:/app/uploads # 挂载上传目录，实现数据持久化
+
+  # 前端博客展示端
+  front:
+    build:
+      context: ./mollia-front
+    container_name: mollia_front
+    restart: unless-stopped
+    ports:
+      - "80:80"
+
+  # 前端后台管理端
+  console:
+    build:
+      context: ./mollia-console
+    container_name: mollia_console
+    restart: unless-stopped
+    ports:
+      - "81:80"
+
+volumes:
+  db_data:
+    driver: local 

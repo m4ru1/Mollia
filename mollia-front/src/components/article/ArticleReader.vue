@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class="article-area">
-            <div v-html="marked(articleData)" class="article-data"></div>
+            <div v-html="marked(props.articleData || '')" class="article-data"></div>
         </div>
         <div id="img-view">
             <img src="#" alt="">
@@ -40,7 +40,6 @@ const props = defineProps({
 })
 
 // 文章数据渲染
-let articleData = ref(props.articleData);
 onMounted(() => {
     /* 手动渲染代码高亮 */
     Array.from(document.getElementsByTagName('pre')).forEach(element => {

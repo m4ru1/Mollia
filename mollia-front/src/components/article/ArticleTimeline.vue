@@ -3,19 +3,19 @@
     <div class="article-box">
         <div class="timeline-header">
             <h2>
-                {{ `${articleCount}` + `${articleCount > 1 ? ' articles' : ' article'}` + ' in total.' }}
+                {{ `${total}` + `${total > 1 ? ' articles' : ' article'}` + ' in total.' }}
             </h2>
         </div>
-        <div class="year-area" v-for="item in testData" :key="item.id">
+        <div class="year-area" v-for="(yearData, year) in groupedArticles" :key="year">
             <div class="article-tag">
                 <h2>
-                    {{ `${getYearStr(item.date)}` }}
+                    {{ year }}
                 </h2>
             </div>
-            <a href="#" class="article-node" v-for="innerItem in item.articleList" :key="innerItem.id">
+            <a href="#" class="article-node" v-for="article in yearData" :key="article.id">
                 <h1>
-                    {{ `${getMonthStr(innerItem.date)}-${getDayStr(innerItem.date)}`}}&emsp;
-                    <small> {{ innerItem.title }} </small>
+                    {{ `${new Date(article.createdAt).getMonth() + 1}-${new Date(article.createdAt).getDate()}`}}&emsp;
+                    <small> {{ article.title }} </small>
                 </h1>
             </a>
         </div>
@@ -24,36 +24,34 @@
 </template>
 
 <script setup>
-const testData = [
-    {id: 1, date: new Date(), articleList:[
-        {id: 1, date: new Date(), title: 'some-item'},
-        {id: 2, date: new Date(), title: 'some-item'},
-        {id: 3, date: new Date(), title: 'some-item'},
-        {id: 4, date: new Date(), title: 'some-item'},
-        {id: 5, date: new Date(), title: 'some-item'},
-    ]},
-    {id: 2, date: new Date(), articleList:[
-        {id: 1, date: new Date(), title: 'some-item'},
-        {id: 2, date: new Date(), title: 'some-item'},
-        {id: 3, date: new Date(), title: 'some-item'},
-        {id: 4, date: new Date(), title: 'some-item'},
-        {id: 5, date: new Date(), title: 'some-item'},
-    ]},
-    {id: 3, date: new Date(), articleList:[
-        {id: 1, date: new Date(), title: 'some-item'},
-        {id: 2, date: new Date(), title: 'some-item'},
-        {id: 3, date: new Date(), title: 'some-item'},
-        {id: 4, date: new Date(), title: 'some-item'},
-        {id: 5, date: new Date(), title: 'some-item'},
-    ]},
-]
+import { ref, onMounted, computed } from 'vue';
+import { getArticles } from '../../api';
 
-var articleCount = 0;
-testData.forEach(
-    (item) => {
-        articleCount += item.articleList.length;
+const articles = ref([]);
+const total = ref(0);
+
+const groupedArticles = computed(() => {
+    const groups = {};
+    articles.value.forEach(article => {
+        const year = new Date(article.createdAt).getFullYear();
+        if (!groups[year]) {
+            groups[year] = [];
+        }
+        groups[year].push(article);
+    });
+    return groups;
+});
+
+
+onMounted(async () => {
+    try {
+        const response = await getArticles({ page: 1, size: 100 }); // 获取前100篇文章作为示例
+        articles.value = response.list;
+        total.value = response.total;
+    } catch (error) {
+        console.error("获取文章列表失败:", error);
     }
-)
+});
 
 function getYearStr(date){
     return `${date.getYear() + 1900}`;
